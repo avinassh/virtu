@@ -123,7 +123,7 @@ func currentDiscoverWeekly(c *spotify.Client) *spotify.SimplePlaylist {
 	return discoverWeekly
 }
 
-// Returns all the playslists of the current user
+// Returns all the playlists of the current user
 func getAllPlaylists(c *spotify.Client) (*spotify.SimplePlaylistPage, error){
 	var allPlaylists *spotify.SimplePlaylistPage
 	var total int
