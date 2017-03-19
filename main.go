@@ -43,6 +43,7 @@ func getSpotifyClient() *spotify.Client {
 		AccessToken:  config.AccessToken,
 		RefreshToken: config.RefreshToken,
 	}
+	auth.SetAuthInfo(config.ClientID, config.ClientSecret)
 	client := auth.NewClient(token)
 	user, err := client.CurrentUser()
 	if err != nil {
