@@ -91,3 +91,31 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	// pass the token to channel
 	ch <- token
 }
+
+func getAllPlaylists(c *spotify.Client) (*spotify.SimplePlaylistPage, error){
+	var allPlaylists *spotify.SimplePlaylistPage
+	var total int
+	limit := 50
+	offset := 0
+	opt := spotify.Options{
+		Limit:  &limit,
+		Offset: &offset,
+	}
+	for {
+		playlists, err := c.CurrentUsersPlaylistsOpt(&opt)
+		if err != nil {
+			return nil, err
+		}
+		total = playlists.Total
+		if allPlaylists == nil {
+			allPlaylists = playlists
+		} else {
+			allPlaylists.Playlists = append(allPlaylists.Playlists, playlists.Playlists...)
+		}
+		offset = offset + limit
+		if total < offset {
+			break
+		}
+	}
+	return allPlaylists, nil
+}
