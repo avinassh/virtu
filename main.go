@@ -13,6 +13,8 @@ import (
 const (
 	redirectURI = "http://localhost:8080/callback"
 	port        = 8080
+	defaultLimit = 50
+	defaultOffset = 0
 )
 
 var (
@@ -31,12 +33,9 @@ func main() {
 func getSpotifyClient() *spotify.Client {
 	config := readConfig()
 	if config.AccessToken == "" || config.RefreshToken == "" {
-		fmt.Println("No Config")
 		initOAuth()
 		// read config again
 		config = readConfig()
-	} else {
-		fmt.Println("From Config")
 	}
 	token := &oauth2.Token{
 		Expiry:       time.Unix(config.TokenExpiry, 0),
@@ -46,11 +45,10 @@ func getSpotifyClient() *spotify.Client {
 	}
 	auth.SetAuthInfo(config.ClientID, config.ClientSecret)
 	client := auth.NewClient(token)
-	user, err := client.CurrentUser()
+	_, err := client.CurrentUser()
 	if err != nil {
 		log.Fatal("Failed :", err)
 	}
-	fmt.Println("Hi: ", user.ID)
 	return &client
 }
 
@@ -93,7 +91,17 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	ch <- token
 }
 
-func currentDiscoverWeekly(c *spotify.Client) (*spotify.SimplePlaylist) {
+// Returns current Discover Weekly playlist of the user
+//
+// A user may not have a Discover Weekly playlist at all, user can 'unfollow'
+// the playlist and the playlist will be gone
+//
+// Similarly a user may have more than two such playlists, as user can follow
+// someone else's playlist
+//
+// Also, the playlist returned may not be the user's at all. A user may unfollow
+// his own playlist and follow someone else's. And I give a damn.
+func currentDiscoverWeekly(c *spotify.Client) *spotify.SimplePlaylist {
 	allPlaylists, err := getAllPlaylists(c)
 	if err != nil {
 		log.Fatal("Failed to fetch playlists from Spotify", err)
@@ -115,11 +123,12 @@ func currentDiscoverWeekly(c *spotify.Client) (*spotify.SimplePlaylist) {
 	return discoverWeekly
 }
 
+// Returns all the playslists of the current user
 func getAllPlaylists(c *spotify.Client) (*spotify.SimplePlaylistPage, error){
 	var allPlaylists *spotify.SimplePlaylistPage
 	var total int
-	limit := 50
-	offset := 0
+	limit := defaultLimit
+	offset := defaultOffset
 	opt := spotify.Options{
 		Limit:  &limit,
 		Offset: &offset,
