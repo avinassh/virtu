@@ -24,7 +24,8 @@ var (
 
 func main() {
 	client := getSpotifyClient()
-	fmt.Println(client)
+	disoverWeekly := currentDiscoverWeekly(client)
+	fmt.Println(disoverWeekly)
 }
 
 func getSpotifyClient() *spotify.Client {
@@ -90,6 +91,28 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Login Completed!")
 	// pass the token to channel
 	ch <- token
+}
+
+func currentDiscoverWeekly(c *spotify.Client) (*spotify.SimplePlaylist) {
+	allPlaylists, err := getAllPlaylists(c)
+	if err != nil {
+		log.Fatal("Failed to fetch playlists from Spotify", err)
+	}
+	var discoverWeekly *spotify.SimplePlaylist
+	count := 0
+	for _, item := range allPlaylists.Playlists {
+		if item.Name == "Discover Weekly" && item.Owner.ID == "spotify" {
+			discoverWeekly = &item
+			count += 1
+		}
+	}
+	if count == 0 {
+		log.Fatal("User does not have a Discover Weekly playlist")
+	}
+	if count > 1 {
+		log.Fatal("User has more than one Discover Weekly playlist")
+	}
+	return discoverWeekly
 }
 
 func getAllPlaylists(c *spotify.Client) (*spotify.SimplePlaylistPage, error){
