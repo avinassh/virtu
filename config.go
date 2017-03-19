@@ -16,7 +16,7 @@ var (
 
 // Represents the config file
 type Config struct {
-	ClintID      string `json:"clientID"`
+	ClientID     string `json:"clientID"`
 	ClientSecret string `json:"clientSecret"`
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
@@ -25,7 +25,7 @@ type Config struct {
 
 // Validates the config file
 func validateConfig(config Config) {
-	if config.ClintID == "" {
+	if config.ClientID == "" {
 		log.Fatal("Client ID is empty")
 	}
 	if config.ClientSecret == "" {
@@ -47,7 +47,7 @@ func readConfig() Config {
 
 // Writes struct `Config` to the file `settings.json`
 func writeConfig(config Config) {
-	jsonBytes, err := json.Marshal(config)
+	jsonBytes, err := json.MarshalIndent(config, "", "    ")
 	if err != nil {
 		log.Fatal(err)
 	}
