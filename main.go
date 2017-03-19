@@ -1,4 +1,4 @@
-package virtu
+	package virtu
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/zmb3/spotify"
+	"golang.org/x/oauth2"
 )
 
 const redirectURI = "http://localhost:8080/callback"
@@ -15,7 +16,7 @@ const redirectURI = "http://localhost:8080/callback"
 var (
 	auth = spotify.NewAuthenticator(redirectURI, spotify.ScopeUserReadPrivate, spotify.ScopePlaylistReadPrivate,
 		spotify.ScopePlaylistModifyPrivate)
-	ch    = make(chan *spotify.Client)
+	ch    = make(chan *oauth2.Token)
 	state = getRandomString(20)
 )
 
@@ -58,7 +59,7 @@ func startServer() *http.Server {
 }
 
 func completeAuth(w http.ResponseWriter, r *http.Request) {
-	tok, err := auth.Token(state, r)
+	token, err := auth.Token(state, r)
 	if err != nil {
 		http.Error(w, "Couldn't get token", http.StatusForbidden)
 		log.Fatal(err)
@@ -67,10 +68,9 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		log.Fatalf("State mismatch: %s != %s\n", st, state)
 	}
-	// use the token to get an authenticated client
-	client := auth.NewClient(tok)
 	fmt.Fprintf(w, "Login Completed!")
-	ch <- &client
+	// pass the token to channel
+	ch <- token
 }
 
 // from https://siongui.github.io/2015/04/13/go-generate-random-string/
