@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -22,6 +24,7 @@ type Config struct {
 	RefreshToken string `json:"refreshToken"`
 	TokenExpiry  int64  `json:"tokenExpiry"`
 	PlaylistID   string `json:"playlistID"`
+	TokenType    string `json:"tokenType"`
 }
 
 // Validates the config file
@@ -53,4 +56,14 @@ func writeConfig(config Config) {
 		log.Fatal(err)
 	}
 	ioutil.WriteFile(configFilename, jsonBytes, os.FileMode(configFilePerm))
+}
+
+// receives OAuth token and updates the config file accordingly
+func updateConfig(token *oauth2.Token) {
+	config := readConfig()
+	config.AccessToken = token.AccessToken
+	config.RefreshToken = token.RefreshToken
+	config.TokenExpiry = token.Expiry.Unix()
+	config.TokenType = token.TokenType
+	writeConfig(config)
 }
