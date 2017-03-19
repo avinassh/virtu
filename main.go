@@ -30,16 +30,12 @@ func main() {
 
 func initOAuth() {
 	config := readConfig()
-	srv := startServer()
+	startServer()
 	auth.SetAuthInfo(config.ClientID, config.ClientSecret)
 	url := auth.AuthURL(state)
 	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
-	client := <-ch
-	// code breaks without this print statement :|
-	fmt.Println(srv)
-	if err := srv.Shutdown(nil); err != nil {
-		log.Fatal("Couldn't shutdown the server: ", err)
-	}
+	token := <-ch
+	client := auth.NewClient(token)
 	user, err := client.CurrentUser()
 	if err != nil {
 		log.Fatal(err)
