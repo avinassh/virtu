@@ -3,5 +3,6 @@
   "clientSecret": "",
   "accessToken": "",
   "refreshToken": "",
+  "tokenExpiry": "",
   "playlistID": ""
 }

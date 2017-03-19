@@ -1,4 +1,4 @@
-package virtu
+package main
 
 // this file handles the config file - settings.json
 
@@ -20,6 +20,7 @@ type Config struct {
 	ClientSecret string `json:"clientSecret"`
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
+	TokenExpiry  int64  `json:"tokenExpiry"`
 	PlaylistID   string `json:"playlistID"`
 }
 
