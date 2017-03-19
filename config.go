@@ -23,6 +23,16 @@ type Config struct {
 	PlaylistID   string `json:"playlistID"`
 }
 
+// Validates the config file
+func validateConfig(config Config) {
+	if config.ClintID == "" {
+		log.Fatal("Client ID is empty")
+	}
+	if config.ClientSecret == "" {
+		log.Fatal("Client Secret is empty")
+	}
+}
+
 // Reads the `settings.json` and returns data in struct `Config`
 func readConfig() Config {
 	raw, err := ioutil.ReadFile(configFilename)
@@ -31,6 +41,7 @@ func readConfig() Config {
 	}
 	var config Config
 	json.Unmarshal(raw, &config)
+	validateConfig(config)
 	return config
 }
 
