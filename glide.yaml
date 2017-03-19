@@ -1,0 +1,3 @@
+package: github.com/avinassh/virtu
+import:
+- package: github.com/zmb3/spotify

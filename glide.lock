@@ -1,0 +1,6 @@
+hash: e9fb14c6793255b571fc5e8e012e49770db0f49e4930e9ce9ecc5bd1926ee530
+updated: 2017-03-19T17:12:01.856475936+05:30
+imports:
+- name: github.com/zmb3/spotify
+  version: d12d726b0e288deb2a8d21212da3f64268612fe5
+testImports: []
