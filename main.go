@@ -1,4 +1,4 @@
-	package virtu
+package main
 
 import (
 	"fmt"
@@ -23,10 +23,23 @@ var (
 func main() {
 	config := readConfig()
 	if config.AccessToken == "" || config.RefreshToken == "" {
+		fmt.Println("No Config")
 		initOAuth()
+		// read config again
+		config = readConfig()
 	} else {
-		fmt.Println("Nope")
+		fmt.Println("From Config")
 	}
+	client := auth.NewClient(&oauth2.Token{
+		AccessToken:  config.AccessToken,
+		RefreshToken: config.RefreshToken,
+		Expiry:       time.Unix(config.TokenExpiry, 0),
+	})
+	user, err := client.CurrentUser()
+	if err != nil {
+		log.Fatal("Shit :", err)
+	}
+	fmt.Println("Hi: ", user.ID)
 }
 
 func initOAuth() {
@@ -36,12 +49,16 @@ func initOAuth() {
 	url := auth.AuthURL(state)
 	fmt.Println("Please log in to Spotify by visiting the following page in your browser:", url)
 	token := <-ch
+	fmt.Println(token.Expiry.Unix())
 	client := auth.NewClient(token)
-	user, err := client.CurrentUser()
+	_, err := client.CurrentUser()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("You are logged in as:", user.ID)
+	config.AccessToken = token.AccessToken
+	config.RefreshToken = token.RefreshToken
+	config.TokenExpiry = token.Expiry.Unix()
+	writeConfig(config)
 }
 
 func startServer() *http.Server {
